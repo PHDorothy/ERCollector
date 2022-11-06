@@ -10,3 +10,5 @@ get-ExecutionPolicy
 set-ExecutionPolicy RemoteSigned
 ```
 
+如果lxml安装失败，请使用编译好的whl直接安装地址:
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
