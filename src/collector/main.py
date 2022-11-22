@@ -8,7 +8,7 @@ from eur_radiology import EurRadiology
 def get_issue(journal:str, volume:int, issue:int) -> Issue:
     if journal == "eur_radiology":
         eur_radiology = EurRadiology()
-        issue = eur_radiology.get_issue(32, 10)
+        issue = eur_radiology.get_issue(volume, issue)
         return issue
     else:
         sys.exit('failed to get <{}> contents!'.format(journal))
@@ -22,8 +22,16 @@ def write_to_file(issue:Issue, path:str, file_name:str):
     index = 1
     for paper in issue.papers:
         file.write("## {} {}\n\n".format(index, paper.title))
+
+        div = ""
+        for auth in paper.auth_list:
+            file.write(div + auth.name)
+            div = ","
+        file.write("\n\n")
+
         file.write("<{}>\n\n".format(paper.herf))
         index += 1
+
     file.close()
 
 def main():

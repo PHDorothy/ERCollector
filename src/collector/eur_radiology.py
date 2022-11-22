@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
 from requests.models import Response
 
-from base import Issue, Paper
+from base import Issue, Paper, Author
 
 DEBUG = False
 
@@ -52,9 +52,27 @@ class EurRadiology(object):
                 title_tag = article_tag.find(attrs={"data-track-action": "clicked article"})
                 title = title_tag.get_text()
                 href = title_tag["href"]
-                issue.add_paper(Paper(href, title))
-
+                paper = self.parse_paper(title, href)
+                issue.add_paper(paper)
+                print("title={}, href={}, auth={}".format(title, href, paper.auth_list))
+                time.sleep(0.2)
         return issue
+
+    def parse_paper(self, title:str, href:str) -> Paper:
+        paper = Paper(href, title)
+        html = requests.get(href)
+        paper.auth_list = self.get_auth_list(html)
+        return paper
+
+    def get_auth_list(self, paper_html:Response) -> list[Author]:
+        auth_list:list[Author] = []
+        soup = BeautifulSoup(paper_html.text, "lxml")
+        author_list_item:ResultSet[Tag] = soup.find_all(name="li", class_="c-article-author-list__item")
+        for author_item in author_list_item:
+            auth_name_tag = author_item.find(attrs={"data-test": "author-name"})
+            auth = Author(auth_name_tag.get_text())
+            auth_list.append(auth)
+        return auth_list
 
 # test
 if __name__ == "__main__":
